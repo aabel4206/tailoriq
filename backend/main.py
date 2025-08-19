@@ -1,28 +1,38 @@
-from fastapi import FastAPI, UploadFile, File, Form, Depends
-import os, uuid
-from sqlmodel import Session
-from db import create_db_and_tables, get_session
-from models.models_db import ResumeAnalysis
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 
-app = FastAPI(title="TailorIQ Backend (Postgres)")
+from db import create_db_and_tables
+from routes.users import router as users_router
+from routes.jobs import router as jobs_router
+from routes.analyses import router as analyses_router
 
-TMP_DIR = "tmp"
-os.makedirs(TMP_DIR, exist_ok=True)
+# create FastAPI app
+app = FastAPI(title="TailorIQ Backend (PostgreSQL, Scalable)")
 
+# allow frontend (React/Vite, Next.js, etc.) to connect
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[
+        "*",
+        "http://localhost:5173", "http://127.0.0.1:5173",   # Vite
+        "http://localhost:3000", "http://127.0.0.1:3000"    # Next.js / CRA
+    ],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+# run this at startup
 @app.on_event("startup")
 def on_startup():
     create_db_and_tables()
 
-@app.post("/analyze/")
-async def analyze_resume(job_description: str = Form(...), file: UploadFile = File(...), session: Session = Depends(get_session)):
-    tmp_path = os.path.join(TMP_DIR, f"{uuid.uuid4().hex}_{file.filename}")
-    with open(tmp_path, "wb") as f:
-        f.write(await file.read())
+# health check route
+@app.get("/")
+def health():
+    return {"status": "ok", "message": "TailorIQ backend is running 🚀"}
 
-    analysis = ResumeAnalysis(filename=file.filename, match_score=0.0, matched="[]", missing="[]")
-    session.add(analysis)
-    session.commit()
-    session.refresh(analysis)
-
-    os.remove(tmp_path)
-    return {"message": "Uploaded", "id": analysis.id}
+# mount routers
+app.include_router(users_router, prefix="/users", tags=["Users"])
+app.include_router(jobs_router, prefix="/jobs", tags=["Jobs"])
+app.include_router(analyses_router, prefix="/analyses", tags=["Analyses"])
