@@ -1,6 +1,10 @@
+@import url('https://fonts.googleapis.com/css2?family=Merriweather:wght@400;700&family=Poppins:wght@400;600;700&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-
-
+/* Optional global body styling */
+body {
+  @apply font-sans bg-secondary text-dark;
+}

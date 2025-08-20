@@ -1,21 +1,23 @@
 import React, { useState } from "react";
+import Layout from "../components/Layout";
 import UploadForm from "../components/UploadForm";
-import ResultsCard from "../components/ResultsCard";
-import { useAuth } from "../context/AuthContext";
 
 export default function Analyze() {
-  const { userId } = useAuth();
-  const [result, setResult] = useState<any | null>(null);
-
-  if (!userId) return <div className="p-6">Please log in to analyze resumes.</div>;
+  const [result, setResult] = useState<any>(null);
 
   return (
-    <div className="p-6 max-w-2xl mx-auto">
-      <h1 className="text-2xl font-bold mb-4">Analyze Resume</h1>
-      <UploadForm onResult={(d)=>setResult(d)} userId={userId} />
-      <div className="mt-6">
-        <ResultsCard data={result} />
+    <Layout>
+      <h2 className="text-3xl font-bold text-red-600 mb-6">Analyze Resume</h2>
+      <div className="max-w-md mx-auto bg-white p-6 rounded-md shadow-md">
+        {/* Removed userId prop because UploadForm no longer needs it */}
+        <UploadForm onResult={setResult} />
+        {result && (
+          <div className="mt-4 p-4 bg-gray-100 rounded-md">
+            <h3 className="font-semibold text-red-600">Analysis Result:</h3>
+            <pre className="whitespace-pre-wrap">{JSON.stringify(result, null, 2)}</pre>
+          </div>
+        )}
       </div>
-    </div>
+    </Layout>
   );
 }
