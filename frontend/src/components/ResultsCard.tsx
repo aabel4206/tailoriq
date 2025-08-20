@@ -1,5 +1,3 @@
-import React from "react";
-
 export default function ResultsCard({ data }: { data: any }) {
   if (!data) return null;
   return (

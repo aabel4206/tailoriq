@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import Layout from "../components/Layout";
 import Button from "../components/Button";
 import { API } from "../api"; // your API wrapper
